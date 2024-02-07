@@ -1,26 +1,7 @@
-import 'dart:math';
-import 'dart:ui';
 import 'package:advanced_widgets/sun.dart';
 import 'package:flutter/material.dart';
 import 'cloud_rain.dart';
 import 'cloud_sun.dart';
-
-/*class WeatherIcon extends StatelessWidget {
-  final double weatherState;
-
-  WeatherIcon({required this.weatherState, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    if(weatherState == 0.0) {
-      return SunCanvas();
-    } else if(weatherState == 0.5) {
-      return CloudSunCanvas();
-    } else {
-      return CloudRainCanvas();
-    }
-  }
-}*/
 
 class WeatherScreen extends StatefulWidget {
   final double weatherState;
@@ -31,43 +12,65 @@ class WeatherScreen extends StatefulWidget {
   _WeatherScreenState createState() => _WeatherScreenState();
 }
 
-class _WeatherScreenState extends State<WeatherScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+class _WeatherScreenState extends State<WeatherScreen> {
 
-  @override
-  void initState() {
-    super.initState();
-    _controller =
-        AnimationController(duration: Duration(seconds: 1), vsync: this);
-    _animation = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
-    //_controller.forward();
+  double _size = 100.0;
+  bool isCentered = false;
+
+  void _updateSize() {
+    setState(() {
+      _size = (isCentered) ? 100.0 : 300.0;
+      isCentered = !isCentered;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return GestureDetector(
-            onTap: () {
-              _controller.forward();
-            },
-            child: Transform.scale(
-                scale: _animation.value,
-                child: CloudRainCanvas(),
-            ),
-          );
-        },
+    return GestureDetector(
+      onTap: () {
+        _updateSize();
+      },
+      child: AnimatedSize(
+        curve: Curves.easeIn,
+        duration: const Duration(seconds: 1),
+        child: DefineWeather(weatherState: widget.weatherState, imageSize: _size, isCentered: isCentered),
       ),
     );
   }
+}
+
+class DefineWeather extends StatelessWidget {
+  double weatherState;
+  double imageSize;
+  bool isCentered;
+
+  DefineWeather({required this.weatherState, required this.imageSize, required this.isCentered});
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    if(weatherState > 0.0 && weatherState < 0.6) {
+      return (isCentered)
+          ? Stack(
+              children: [
+                CloudSunCanvas(imageSize: imageSize, isCentered: isCentered),
+                Positioned(
+                  bottom: 200,
+                  left: 100,
+                  child: Text(
+                      'Облачно, 12 градусов',
+                    style: TextStyle(
+                      fontSize: 20
+                    ),
+                  ),
+                )
+              ],
+            )
+          : CloudSunCanvas(imageSize: imageSize, isCentered: isCentered);
+
+    } else if(weatherState >= 0.7 && weatherState <= 1.0) {
+      return CloudRainCanvas(imageSize: imageSize, isCentered: isCentered);
+    } else {
+      return SunCanvas(imageSize: imageSize, isCentered: isCentered);
+    }
   }
 }

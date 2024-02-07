@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
           )
         ],
       ),
-      body:  WeatherScreen(weatherState: 0.7,)
+      body:  WeatherScreen(weatherState: 0.0,),
     );
   }
 }

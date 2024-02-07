@@ -3,14 +3,18 @@ import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
 
 class CloudRainCanvas extends StatefulWidget {
-  const CloudRainCanvas({super.key});
+
+  double imageSize;
+  bool isCentered;
+
+  CloudRainCanvas({required this.imageSize, required this.isCentered});
 
   @override
   _CloudRainCanvasPageState createState() => _CloudRainCanvasPageState();
 }
 
 class _CloudRainCanvasPageState extends State<CloudRainCanvas> {
-  ui.Image? image;
+  late ui.Image image;
 
   @override
   void initState() {
@@ -27,20 +31,26 @@ class _CloudRainCanvasPageState extends State<CloudRainCanvas> {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: ImageInsideCanvas(image: image),
+      painter: ImageInsideCanvas(image: image, imageSize: widget.imageSize, isCentered: widget.isCentered),
       child: SizedBox.expand(),
     );
   }
 }
 
 class ImageInsideCanvas extends CustomPainter {
-  ImageInsideCanvas({required this.image});
-  ui.Image? image;
+  ImageInsideCanvas({required this.image, required this.imageSize, required this.isCentered});
+  ui.Image image;
+  double imageSize;
+  bool isCentered;
 
   @override
   void paint(Canvas canvas, Size size) async {
-    Paint greenBrush = Paint()..color = Colors.greenAccent;
-    canvas.drawImage(image!, Offset(250, 0), greenBrush);
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      (isCentered) ? Rect.fromLTWH(size.width / 2 - imageSize / 2, size.height / 2 - imageSize / 2, imageSize, imageSize) : Rect.fromLTWH(250, 0, imageSize, imageSize),
+      Paint(),
+    );
   }
 
   @override
